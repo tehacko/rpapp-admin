@@ -1,20 +1,23 @@
 import { useState } from 'react';
-import { useErrorHandler } from 'pi-kiosk-shared';
+import { useErrorHandler, getEnvironmentConfig, API_ENDPOINTS } from 'pi-kiosk-shared';
 import { LoginForm } from './components/LoginForm';
 import { Dashboard } from './components/Dashboard';
 import './App.css';
 
 function App() {
-  const [token, setToken] = useState<string | null>(null);
-  const [view, setView] = useState<'login' | 'dashboard' | 'kiosk'>('kiosk');
+  const [token, setToken] = useState<string | null>(() => {
+    // Initialize token from localStorage on app start
+    return localStorage.getItem('admin_token');
+  });
+  const [view, setView] = useState<'login' | 'dashboard'>(() => {
+    // If we have a token, go directly to dashboard
+    return localStorage.getItem('admin_token') ? 'dashboard' : 'login';
+  });
   const { handleError } = useErrorHandler();
-
-  // API client for potential future use
-  // const apiClient = createAPIClient();
 
   const handleLogin = async (username: string, password: string) => {
     try {
-      const response = await fetch('/api/admin/login', {
+      const response = await fetch(`${getEnvironmentConfig().apiUrl}${API_ENDPOINTS.ADMIN_LOGIN}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
@@ -25,7 +28,11 @@ function App() {
       }
 
       const data = await response.json();
-      setToken(data.token);
+      const newToken = data.data.token;
+      
+      // Store token in localStorage for persistence
+      localStorage.setItem('admin_token', newToken);
+      setToken(newToken);
       setView('dashboard');
     } catch (error) {
       handleError(error as Error);
@@ -34,58 +41,22 @@ function App() {
   };
 
   const handleLogout = () => {
+    // Clear token from localStorage
+    localStorage.removeItem('admin_token');
     setToken(null);
-    setView('kiosk');
-  };
-
-  const goToKiosk = () => {
-    setView('kiosk');
-  };
-
-  const goToAdmin = () => {
     setView('login');
   };
 
   if (view === 'login') {
-    return <LoginForm onLogin={handleLogin} onBack={goToKiosk} />;
+    return <LoginForm onLogin={handleLogin} />;
   }
 
   if (view === 'dashboard' && token) {
-    return <Dashboard token={token} onLogout={handleLogout} onBack={goToKiosk} />;
+    return <Dashboard token={token} onLogout={handleLogout} />;
   }
 
-  // Default kiosk redirect view
-  return (
-    <div className="admin-redirect">
-      <div className="redirect-container">
-        <h1>🏪 Kiosk Systém</h1>
-        <p>Vítejte v administraci kiosk systému</p>
-        
-        <div className="redirect-actions">
-          <button onClick={goToAdmin} className="admin-btn">
-            🔐 Admin přihlášení
-          </button>
-          
-          <a 
-            href="/?kioskId=1" 
-            className="kiosk-btn"
-            target="_self"
-          >
-            🖥️ Otevřít kiosk
-          </a>
-        </div>
-        
-        <div className="info-section">
-          <h3>📋 Návod</h3>
-          <ul>
-            <li>Pro správu použijte Admin přihlášení</li>
-            <li>Pro zákazníky otevřete kiosk rozhraní</li>
-            <li>Testovací údaje: admin/admin123</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  );
+  // Default to login view
+  return <LoginForm onLogin={handleLogin} />;
 }
 
 export default App;

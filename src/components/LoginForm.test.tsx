@@ -5,27 +5,24 @@ import { LoginForm } from './LoginForm';
 
 describe('LoginForm Component', () => {
   const mockOnLogin = jest.fn();
-  const mockOnBack = jest.fn();
 
   beforeEach(() => {
     mockOnLogin.mockClear();
-    mockOnBack.mockClear();
   });
 
   test('renders login form elements', () => {
-    render(<LoginForm onLogin={mockOnLogin} onBack={mockOnBack} />);
+    render(<LoginForm onLogin={mockOnLogin} />);
     
     expect(screen.getByText('🔐 Admin Přihlášení')).toBeInTheDocument();
     expect(screen.getByText('Přihlaste se pro správu kiosku')).toBeInTheDocument();
     expect(screen.getByLabelText(/uživatelské jméno/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/heslo/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /🔑 přihlásit se/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /← zpět na kiosek/i })).toBeInTheDocument();
   });
 
   test('handles form input changes', async () => {
     const user = userEvent.setup();
-    render(<LoginForm onLogin={mockOnLogin} onBack={mockOnBack} />);
+    render(<LoginForm onLogin={mockOnLogin} />);
     
     const usernameInput = screen.getByLabelText(/uživatelské jméno/i);
     const passwordInput = screen.getByLabelText(/heslo/i);
@@ -39,7 +36,7 @@ describe('LoginForm Component', () => {
 
   test('calls onLogin with correct credentials on form submission', async () => {
     const user = userEvent.setup();
-    render(<LoginForm onLogin={mockOnLogin} onBack={mockOnBack} />);
+    render(<LoginForm onLogin={mockOnLogin} />);
     
     const usernameInput = screen.getByLabelText(/uživatelské jméno/i);
     const passwordInput = screen.getByLabelText(/heslo/i);
@@ -54,7 +51,7 @@ describe('LoginForm Component', () => {
 
   test('calls onLogin when Enter is pressed in password field', async () => {
     const user = userEvent.setup();
-    render(<LoginForm onLogin={mockOnLogin} onBack={mockOnBack} />);
+    render(<LoginForm onLogin={mockOnLogin} />);
     
     const usernameInput = screen.getByLabelText(/uživatelské jméno/i);
     const passwordInput = screen.getByLabelText(/heslo/i);
@@ -66,15 +63,6 @@ describe('LoginForm Component', () => {
     expect(mockOnLogin).toHaveBeenCalledWith('admin', 'admin123');
   });
 
-  test('calls onBack when back button is clicked', async () => {
-    const user = userEvent.setup();
-    render(<LoginForm onLogin={mockOnLogin} onBack={mockOnBack} />);
-    
-    const backButton = screen.getByRole('button', { name: /← zpět na kiosek/i });
-    await user.click(backButton);
-    
-    expect(mockOnBack).toHaveBeenCalledTimes(1);
-  });
 
   test('shows loading state during login attempt', async () => {
     const user = userEvent.setup();
@@ -86,7 +74,7 @@ describe('LoginForm Component', () => {
     });
     mockOnLogin.mockReturnValue(loginPromise);
     
-    render(<LoginForm onLogin={mockOnLogin} onBack={mockOnBack} />);
+    render(<LoginForm onLogin={mockOnLogin} />);
     
     const usernameInput = screen.getByLabelText(/uživatelské jméno/i);
     const passwordInput = screen.getByLabelText(/heslo/i);
@@ -113,7 +101,7 @@ describe('LoginForm Component', () => {
     // Mock onLogin to throw an error
     mockOnLogin.mockRejectedValue(new Error('Neplatné přihlašovací údaje'));
     
-    render(<LoginForm onLogin={mockOnLogin} onBack={mockOnBack} />);
+    render(<LoginForm onLogin={mockOnLogin} />);
     
     const usernameInput = screen.getByLabelText(/uživatelské jméno/i);
     const passwordInput = screen.getByLabelText(/heslo/i);
@@ -130,7 +118,7 @@ describe('LoginForm Component', () => {
 
   test('shows validation errors for empty fields', async () => {
     const user = userEvent.setup();
-    render(<LoginForm onLogin={mockOnLogin} onBack={mockOnBack} />);
+    render(<LoginForm onLogin={mockOnLogin} />);
     
     const submitButton = screen.getByRole('button', { name: /🔑 přihlásit se/i });
     await user.click(submitButton);
@@ -147,7 +135,7 @@ describe('LoginForm Component', () => {
 
   test('prevents submission with empty fields', async () => {
     const user = userEvent.setup();
-    render(<LoginForm onLogin={mockOnLogin} onBack={mockOnBack} />);
+    render(<LoginForm onLogin={mockOnLogin} />);
     
     const submitButton = screen.getByRole('button', { name: /🔑 přihlásit se/i });
     await user.click(submitButton);
@@ -157,7 +145,7 @@ describe('LoginForm Component', () => {
   });
 
   test('displays test credentials', () => {
-    render(<LoginForm onLogin={mockOnLogin} onBack={mockOnBack} />);
+    render(<LoginForm onLogin={mockOnLogin} />);
     
     expect(screen.getByText('Testovací údaje:')).toBeInTheDocument();
     expect(screen.getByText('admin')).toBeInTheDocument();

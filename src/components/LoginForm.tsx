@@ -3,10 +3,9 @@ import { validateSchema, validationSchemas, getErrorMessage } from 'pi-kiosk-sha
 
 interface LoginFormProps {
   onLogin: (username: string, password: string) => Promise<void>;
-  onBack: () => void;
 }
 
-export function LoginForm({ onLogin, onBack }: LoginFormProps) {
+export function LoginForm({ onLogin }: LoginFormProps) {
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -118,13 +117,6 @@ export function LoginForm({ onLogin, onBack }: LoginFormProps) {
           <p>Heslo: <code>admin123</code></p>
         </div>
         
-        <button 
-          onClick={onBack} 
-          className="back-btn"
-          disabled={isLoading}
-        >
-          ← Zpět na kiosek
-        </button>
       </div>
     </div>
   );

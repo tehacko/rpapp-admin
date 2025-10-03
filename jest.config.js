@@ -1,5 +1,5 @@
 // Jest config for admin app
-export default {
+module.exports = {
   displayName: 'admin-app',
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
@@ -14,11 +14,20 @@ export default {
   ],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
-    '^pi-kiosk-shared$': 'pi-kiosk-shared',
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy'
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(pi-kiosk-shared)/)'
+  ],
   transform: {
-    '^.+\\.(ts|tsx)$': 'ts-jest'
+    '^.+\\.(ts|tsx)$': ['ts-jest', {
+      tsconfig: {
+        jsx: 'react-jsx'
+      },
+      useESM: true
+    }]
   },
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json']
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
+  testTimeout: 10000
 };
