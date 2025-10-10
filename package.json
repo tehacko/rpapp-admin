@@ -13,7 +13,7 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "pi-kiosk-shared": "^1.0.19",
+    "pi-kiosk-shared": "^1.0.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "serve": "^14.2.5",
