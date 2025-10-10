@@ -4,7 +4,8 @@ import {
   AdminProduct, 
   getEnvironmentConfig,
   useErrorHandler,
-  API_ENDPOINTS
+  API_ENDPOINTS,
+  ApiResponse
 } from 'pi-kiosk-shared';
 
 interface UseProductsOptions {
@@ -34,7 +35,7 @@ export function useProducts(options: UseProductsOptions = {}) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
       
-      const data = await response.json();
+      const data: ApiResponse<{ products: AdminProduct[] }> = await response.json();
       
       if (data.success && data.data?.products) {
         return data.data.products;

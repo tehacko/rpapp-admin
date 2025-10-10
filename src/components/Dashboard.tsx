@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getEnvironmentConfig, AdminProduct, API_ENDPOINTS } from 'pi-kiosk-shared';
+import { getEnvironmentConfig, AdminProduct, API_ENDPOINTS, Kiosk, InventoryUpdateRequest, ApiResponse } from 'pi-kiosk-shared';
 import { useProducts } from '../hooks/useProducts';
 
 interface DashboardProps {
@@ -317,7 +317,7 @@ function InventoryRow({ product, kioskId, onUpdate, onRefresh, config }: Invento
 
 // Admin Dashboard Component - Simplified for Product Management
 export function Dashboard({ token, onLogout }: DashboardProps) {
-  const [kiosks, setKiosks] = useState<Array<{id: number, name: string, location: string, description?: string, isActive: boolean}>>([]);
+  const [kiosks, setKiosks] = useState<Kiosk[]>([]);
   const [kioskId, setKioskId] = useState<number>(1);
   const [activeSection, setActiveSection] = useState<'inventory' | 'products' | 'kiosks'>('inventory');
   const [notification, setNotification] = useState<NotificationState>({ show: false, message: '', type: 'info' });
@@ -325,7 +325,7 @@ export function Dashboard({ token, onLogout }: DashboardProps) {
   
   // Kiosk management state
   const [showKioskForm, setShowKioskForm] = useState(false);
-  const [editingKiosk, setEditingKiosk] = useState<{id: number, name: string, location: string, description: string, isActive: boolean} | null>(null);
+  const [editingKiosk, setEditingKiosk] = useState<Kiosk | null>(null);
   const [kioskForm, setKioskForm] = useState({
     name: '',
     location: '',
@@ -685,10 +685,12 @@ export function Dashboard({ token, onLogout }: DashboardProps) {
 
   const handleQuickStockUpdate = async (productId: number, kioskId: number, newQuantity: number) => {
     try {
+      const requestBody: InventoryUpdateRequest = { quantityInStock: newQuantity };
+      
       const response = await fetch(`${config.apiUrl}${API_ENDPOINTS.ADMIN_PRODUCT_INVENTORY_UPDATE.replace(':productId', productId.toString()).replace(':kioskId', kioskId.toString())}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ quantityInStock: newQuantity })
+        body: JSON.stringify(requestBody)
       });
 
       if (response.ok) {
@@ -780,10 +782,10 @@ export function Dashboard({ token, onLogout }: DashboardProps) {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
-        const data = await response.json();
-        setKiosks(data.kiosks || []);
-        if (data.kiosks && data.kiosks.length > 0 && !kiosks.length) {
-          setKioskId(data.kiosks[0].id);
+        const data: ApiResponse<{ kiosks: Kiosk[] }> = await response.json();
+        setKiosks(data.data?.kiosks || []);
+        if (data.data?.kiosks && data.data.kiosks.length > 0 && !kiosks.length) {
+          setKioskId(data.data.kiosks[0].id);
         }
       }
     } catch (error) {
